@@ -1,0 +1,8 @@
+{
+  "name": "EUC World HUD",
+  "version": "0.0.1",
+  "description": "Live ride dashboard for electric unicycles via EUC World",
+  "author": "Jessica Hunt",
+  "entry": "index.html",
+  "permissions": ["network"]
+}

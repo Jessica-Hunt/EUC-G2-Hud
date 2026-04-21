@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EUC World G2 HUD</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: system-ui, sans-serif;
+        background: #111; color: #eee;
+        display: flex; flex-direction: column; align-items: center;
+        padding: 24px 16px; min-height: 100vh;
+      }
+      h1 { font-size: 1.2rem; margin-bottom: 6px; color: #6cf; }
+      p  { font-size: 0.82rem; color: #aaa; margin-bottom: 18px; text-align: center; }
+
+      .card {
+        background: #1e1e1e; border: 1px solid #333; border-radius: 10px;
+        padding: 14px 16px; width: 100%; max-width: 420px; margin-bottom: 12px;
+      }
+      .card label { font-size: 0.75rem; color: #888; display: block; margin-bottom: 4px; }
+      .card small  { font-size: 0.72rem; color: #666; display: block; margin-bottom: 8px; line-height: 1.5; }
+
+      .row { display: flex; gap: 8px; margin-bottom: 8px; }
+      .row input {
+        flex: 1; padding: 8px 10px;
+        background: #2a2a2a; border: 1px solid #444; border-radius: 6px;
+        color: #fff; font-size: 0.9rem;
+      }
+      .row input.port { max-width: 90px; text-align: center; }
+
+      button {
+        padding: 9px 14px; border: none; border-radius: 6px;
+        color: #fff; font-size: 0.85rem; cursor: pointer;
+      }
+      .btn-primary { background: #2d6ef5; }
+      .btn-primary:hover { background: #3a7fff; }
+      .btn-secondary { background: #444; }
+      .btn-secondary:hover { background: #555; }
+      .btn-full { width: 100%; margin-top: 4px; }
+
+      .status-bar {
+        display: flex; align-items: center; gap: 8px;
+        font-size: 0.8rem; color: #aaa;
+      }
+      .dot {
+        width: 8px; height: 8px; border-radius: 50%;
+        background: #555; flex-shrink: 0;
+      }
+      .status-bar.connected .dot { background: #4caf50; }
+      .status-bar.error      .dot { background: #f44336; }
+
+      .info-row {
+        display: flex; justify-content: space-between;
+        font-size: 0.72rem; color: #666; margin-top: 8px;
+      }
+      .info-row span { color: #4caf50; }
+
+      .test-result {
+        font-size: 0.75rem; margin-top: 8px; min-height: 1.2em; color: #aaa;
+        word-break: break-all;
+      }
+
+      pre {
+        font-size: 0.7rem; background: #181818; border: 1px solid #2a2a2a;
+        border-radius: 8px; padding: 10px; width: 100%; max-width: 420px;
+        overflow-x: auto; white-space: pre-wrap; color: #8f8; margin-top: 0;
+      }
+    </style>
+    <script type="module" crossorigin src="/assets/index-SpUqJ-ZC.js"></script>
+  </head>
+  <body>
+    <h1>🛞 EUC World → G2 HUD</h1>
+    <p>Sends live EUC stats to your Even G2 glasses.<br>
+       Both apps must be running on the same phone.</p>
+
+    <div class="card">
+      <label>EUC World Web Server Port</label>
+      <small>Find it in EUC World → Settings → Web Server.<br>
+        The plugin will auto-try localhost, 127.0.0.1, and more.</small>
+      <div class="row">
+        <input id="portInput" class="port" type="number" value="8080" min="1" max="65535" />
+        <button class="btn-secondary" id="testBtn">🔍 Test</button>
+        <button class="btn-primary"   id="applyBtn">Apply</button>
+      </div>
+      <div class="test-result" id="testResult"></div>
+      <div class="info-row">
+        <span>Working URL:</span>
+        <span id="workingUrl">not found yet</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Manual URL override (paste the ✅ URL from the test above)</label>
+      <small>Use this if auto-probe fails but the test button finds a working URL, or start simulator data for screenshots.</small>
+      <div class="row">
+        <input id="manualUrl" type="text" placeholder="e.g. http://192.168.1.42:8080" />
+        <button class="btn-primary" id="manualBtn">Use</button>
+      </div>
+      <button class="btn-secondary btn-full" id="simulatorBtn">Use Simulator Data</button>
+    </div>
+
+    <div class="card">
+      <div class="status-bar" id="statusBar">
+        <div class="dot"></div>
+        <span id="statusText">Initializing…</span>
+      </div>
+      <div class="info-row">
+        <span>Tick count (proves interval is running):</span>
+        <span id="tickCount">0</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Clean mode</label>
+      <small>Use this button as a fallback while we debug hardware gestures.</small>
+      <div class="row">
+        <button class="btn-secondary" id="cleanToggleBtn">Show Critical Only</button>
+      </div>
+      <div class="info-row">
+        <span>Current mode:</span>
+        <span id="cleanModeState">full HUD</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Last EvenHub event</label>
+      <small>Use this to see what the real glasses send when you tap or double tap.</small>
+      <pre id="eventDebug">Waiting for EvenHub events…</pre>
+    </div>
+
+    <pre id="rawData">Waiting for data…</pre>
+
+    <script>
+      // Expose port to main.ts
+      window.__eucPort = document.getElementById('portInput').value;
+
+      // Status display
+      window.__setStatus = (msg, type) => {
+        const bar = document.getElementById('statusBar');
+        bar.className = 'status-bar ' + (type || '');
+        document.getElementById('statusText').textContent = msg;
+      };
+
+      // Tick counter — proves the setInterval is firing
+      window.__setTickCount = (n) => {
+        document.getElementById('tickCount').textContent = String(n);
+      };
+
+      // Show the URL that actually worked
+      window.__setWorkingUrl = (url) => {
+        document.getElementById('workingUrl').textContent = url;
+      };
+
+      window.__setCleanMode = (enabled) => {
+        document.getElementById('cleanModeState').textContent = enabled ? 'critical only' : 'full HUD';
+        document.getElementById('cleanToggleBtn').textContent = enabled ? 'Show Full HUD' : 'Show Critical Only';
+      };
+
+      window.__setEventDebug = (message) => {
+        document.getElementById('eventDebug').textContent = message;
+      };
+
+      // Raw JSON display
+      window.__setRaw = (data) => {
+        document.getElementById('rawData').textContent =
+          JSON.stringify(data, null, 2);
+      };
+
+      // Manual URL override — bypasses auto-probe entirely
+      document.getElementById('manualBtn').addEventListener('click', () => {
+        const url = document.getElementById('manualUrl').value.trim().replace(/\/$/, '');
+        if (!url) return;
+        document.getElementById('workingUrl').textContent = url;
+        window.__forceUrl?.(url);
+      });
+
+      document.getElementById('simulatorBtn').addEventListener('click', () => {
+        const url = 'simulator://euc-world';
+        document.getElementById('workingUrl').textContent = url;
+        window.__forceUrl?.(url);
+      });
+
+      document.getElementById('cleanToggleBtn').addEventListener('click', () => {
+        window.__toggleCleanMode?.();
+      });
+
+      // Update port & reconnect
+      document.getElementById('applyBtn').addEventListener('click', () => {
+        window.__eucPort = document.getElementById('portInput').value;
+        window.__reconnect?.();
+      });
+
+      // Manual connection test (runs in this same WebView context as main.ts)
+      document.getElementById('testBtn').addEventListener('click', () => {
+        const port = document.getElementById('portInput').value;
+        const out  = document.getElementById('testResult');
+        const hosts = ['127.0.0.1', 'localhost', '10.0.2.2', window.location.hostname];
+
+        out.style.color = '#aaa';
+        out.textContent = 'Testing…';
+
+        let tried = 0;
+        let found = false;
+
+        hosts.forEach(host => {
+          const url = `http://${host}:${port}/api/values`;
+          const xhr = new XMLHttpRequest();
+          xhr.open('GET', url, true);
+          xhr.timeout = 1500;
+          xhr.onload = () => {
+            if (!found && xhr.status >= 200 && xhr.status < 300) {
+              found = true;
+              out.style.color = '#4caf50';
+              out.textContent = `\u2705 ${url} works! Response: ${xhr.responseText.slice(0, 80)}`;
+            }
+            tried++;
+          };
+          xhr.onerror = xhr.ontimeout = () => {
+            tried++;
+            if (tried === hosts.length && !found) {
+              out.style.color = '#f44336';
+              out.textContent = '\u274c All URLs failed. Check EUC World → Settings → Web Server is ON and port is correct.';
+            }
+          };
+          xhr.send();
+        });
+      });
+    </script>
+  </body>
+</html>
