@@ -1,17 +1,23 @@
 # EUC World HUD for Even G2 Glasses
 
-Displays live ride data from **EUC World** on your **Even G2** smart glasses — speed, battery, temperature, voltage, current, power, and trip/odometer distance — updated every second.
+Displays a mixed **fast/slow ride HUD** from **EUC World** on your **Even G2** smart glasses.
 
+- **Fast pane**: speed dial, safety-margin marker, `MRG/PWR`, heartbeat
+- **Slow pane**: trip, odometer, wheel battery, temperature, voltage/current, phone battery, glasses battery
+- **Compact mode**: startup/simulator layout with the dial plus one summary block
+- **Critical-only mode**: hides the slow pane and leaves only the fast ride view
+
+```text
++------------------------- FULL HUD --------------------------+
+|       42                         TRIP   8.42 km             |
+|      km/h                        ODO    1234 km             |
+|   dial + safety marker           BAT    78%   TEMP 32C      |
+| MRG 63%   PWR 839W .                                         |
+| VOLT 67.2V   CURR 12.5A          PHONE 46%  GLASSES 82%     |
++-------------------------------------------------------------+
 ```
-+----------- EUC WORLD HUD ----------+
-|  SPEED      42.3 km/h               |
-|  BATT    ████████░░ 78%             |
-|  TEMP      32.1 °C                  |
-|  VOLT      67.2 V                   |
-|  CURR      12.5 A      839 W        |
-|  TRIP       8.42 km  ODO  1234 km   |
-+-- Live  14:32                     --+
-```
+
+Fast telemetry is polled every **100 ms**. The non-critical text pane refreshes on a slower cadence (about **2 seconds**) to reduce rendering overhead on the glasses.
 
 ---
 
@@ -20,9 +26,10 @@ Displays live ride data from **EUC World** on your **Even G2** smart glasses —
 | Requirement | Notes |
 |-------------|-------|
 | Even G2 glasses | Paired to your Android phone via Even Realities app |
-| EUC World ≥ 2.50 | Free app on Google Play |
-| Node.js 18+ | For running the dev server |
-| Your phone & PC on the same Wi-Fi | For sideloading |
+| EUC World | Running on the same phone as the Even app |
+| Node.js 20+ | Recommended for local development/builds |
+| Your phone & host on the same Wi-Fi | Needed when serving locally from your PC |
+| Docker (optional) | For static server deployment via `docker compose` |
 
 ---
 
@@ -54,9 +61,16 @@ Scan the QR code with the **Even Realities app** on your phone.
 
 ### 4. Configure the URL (if needed)
 
-The phone-side companion screen shows a URL input box.  
-Default is `http://localhost:8080` — change this to match your EUC World port.  
-Tap **Apply & Reconnect** after changing it.
+The phone-side companion screen now includes:
+
+- **Test**: probes common localhost variants
+- **Apply**: reconnects using the selected port
+- **Manual URL override**: forces a specific base URL
+- **Use Simulator Data**: starts the built-in mock EUC World source
+- **Show Critical Only**: phone-side fallback for clean mode
+- **Last EvenHub event**: raw event inspector for tap/gesture debugging
+
+Default probing still targets port `8080`, but the app will try multiple host variants automatically.
 
 ---
 
@@ -67,17 +81,31 @@ Tap **Apply & Reconnect** after changing it.
 | "No signal" on glasses | EUC World web server not enabled, or wrong port |
 | Glasses show nothing | Bridge not connected — check Even app is open |
 | All values show `--` | Wheel not connected to EUC World |
-| Wrong data after update | EUC World v2.60 changed the API shape — the plugin handles both, but check `console.log` output in browser devtools |
+| Tick count stays at `0` | The runtime is not polling — reconnect from the companion screen and confirm the bridge is live |
+| Wrong or missing fields | Use the raw JSON panel to inspect the payload actually coming from EUC World |
+| Tap/gesture behavior is odd | Use the **Last EvenHub event** panel to inspect what the glasses are sending |
 
 ### EUC World API Notes
 
-The `/api/values` endpoint changed structure in **v2.60**:
-- **Before v2.60**: Fields returned flat at root level `{ speed: 42.3, battery: 78, ... }`
-- **v2.60+**: Fields nested under `data` key `{ data: { speed: 42.3, battery: 78, ... } }`
+The plugin currently handles multiple `/api/values` shapes:
 
-This plugin handles both automatically.
+- **Flat fields** at the root
+- **Nested wrappers** like `data`, `payload`, `result`, `response`, `wheel`, `telemetry`, or `stats`
+- **Coded `values[]` payloads** used by newer EUC World builds
 
-If you see unexpected `--` values, open browser devtools while the dev server is running and check `window.__setRaw` output to see the raw API response and identify the correct field names.
+Important mappings in the current HUD include:
+
+- `vsp` → speed
+- `vsmg` / `vsmn` → safety margin
+- `vpo` / `vpn` / `vpx` → power
+- `vvo` / `vvn` / `vvx` → voltage
+- `vcu` / `vcn` / `vcx` → current
+- `vbf` / `vba` / `vbm` / `vbx` → wheel battery
+- `vte` / `vtn` / `vtx` → temperature
+- `vdi` / `vdt` → trip / odometer
+- `pba` → phone battery
+
+Glasses battery is **not** sourced from EUC World; it comes from the Even SDK device status callbacks.
 
 ---
 
@@ -96,6 +124,7 @@ euc-world-g2/
 │   └── types.ts       ← global window hooks and shared TS types
 ├── index.html         ← phone-side companion UI
 ├── Dockerfile
+├── .dockerignore
 ├── docker-compose.yml
 ├── app.json           ← Even Hub app manifest
 ├── package.json
@@ -129,6 +158,13 @@ The app will be served on:
 
 ```text
 http://localhost:8080
+```
+
+If port `8080` is already in use on your server, change the host side of the port mapping in `docker-compose.yml`, for example:
+
+```yaml
+ports:
+  - "18080:80"
 ```
 
 To stop it:
