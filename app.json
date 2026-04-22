@@ -1,8 +1,18 @@
 {
+  "package_id": "com.jessicahunt.eucworldg2",
   "name": "EUC World HUD",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Live ride dashboard for electric unicycles via EUC World",
   "author": "Jessica Hunt",
-  "entry": "index.html",
-  "permissions": ["network"]
+  "entrypoint": "index.html",
+  "edition": "202601",
+  "min_app_version": "1.0.0",
+  "min_sdk_version": "1.0.0",
+  "permissions": [
+    {
+      "name": "network",
+      "desc": "Required to connect to EUC World bridge"
+    }
+  ],
+  "supported_languages": ["en"]
 }

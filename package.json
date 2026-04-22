@@ -1,6 +1,6 @@
 {
   "name": "euc-world-g2",
-  "version": "1.0.0",
+  "version": "0.0.2",
   "description": "EUC World live ride HUD for Even G2 smart glasses",
   "private": true,
   "type": "module",

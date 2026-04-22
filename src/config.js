@@ -52,7 +52,7 @@ export const COMPACT_FAST_READOUT_CONTAINER = {
     height: 24,
 };
 export const COMPACT_SLOW_TEXT_CONTAINERS = [
-    { id: 4, name: "siminfo", x: 206, y: 12, width: 360, height: 188, role: "summary" },
+    { id: 4, name: "siminfo", x: 232, y: 12, width: 334, height: 192, role: "summary" },
 ];
 export const SLOW_TEXT_CONTAINERS = [
     { id: 3, name: "triptxt", x: 298, y: 14, width: 268, height: 32, role: "trip" },
