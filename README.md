@@ -4,18 +4,10 @@ Displays a mixed **fast/slow ride HUD** from **EUC World** on your **Even G2** s
 
 - **Fast pane**: speed dial, safety-margin marker, `MRG/PWR`, heartbeat
 - **Slow pane**: trip, odometer, wheel battery, temperature, voltage/current, phone battery, glasses battery
-- **Compact mode**: startup/simulator layout with the dial plus one summary block
+- **Compact mode**: startup/simulator layout with a stacked summary block that reads more like the full HUD in screenshots
 - **Critical-only mode**: hides the slow pane and leaves only the fast ride view
 
-```text
-+------------------------- FULL HUD --------------------------+
-|       42                         TRIP   8.42 km             |
-|      km/h                        ODO    1234 km             |
-|   dial + safety marker           BAT    78%   TEMP 32C      |
-| MRG 63%   PWR 839W .                                         |
-| VOLT 67.2V   CURR 12.5A          PHONE 46%  GLASSES 82%     |
-+-------------------------------------------------------------+
-```
+![Illustrated preview of the full and compact EUC World HUD layouts](./docs/readme-hud-preview.svg)
 
 Fast telemetry is polled every **100 ms**. The non-critical text pane refreshes on a slower cadence (about **2 seconds**) to reduce rendering overhead on the glasses.
 

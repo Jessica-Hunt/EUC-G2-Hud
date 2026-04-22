@@ -67,7 +67,7 @@ export const COMPACT_FAST_READOUT_CONTAINER = {
 } as const;
 
 export const COMPACT_SLOW_TEXT_CONTAINERS = [
-  { id: 4, name: "siminfo", x: 206, y: 12, width: 360, height: 108, role: "summary" },
+  { id: 4, name: "siminfo", x: 232, y: 12, width: 334, height: 192, role: "summary" },
 ] as const;
 
 export const SLOW_TEXT_CONTAINERS = [

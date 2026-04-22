@@ -44,17 +44,34 @@ export async function startPlugin(bridge) {
         resetHudSignatures();
         return true;
     };
-    const ensureHudLayout = async (mode) => {
-        if (getHudLayoutMode() === mode)
-            return true;
+    const forceHudLayout = async (mode) => {
         const previousMode = getHudLayoutMode();
         setHudLayoutMode(mode);
         const rebuilt = await rebuildHudPage();
         if (rebuilt)
             return true;
         setHudLayoutMode(previousMode);
-        console.warn(`[HUD] failed to switch layout to ${mode}, keeping ${previousMode}`);
+        console.warn(`[HUD] failed to rebuild layout ${mode}, restoring ${previousMode}`);
         return false;
+    };
+    const ensureHudLayout = async (mode) => {
+        if (getHudLayoutMode() === mode)
+            return true;
+        return forceHudLayout(mode);
+    };
+    const applyPreferredHudLayout = async (url, status, state) => {
+        if (url !== SIMULATOR_URL) {
+            const switched = await ensureHudLayout("full");
+            if (switched)
+                primeHud(status, state);
+            return status;
+        }
+        if (!await ensureHudLayout("compact")) {
+            window.__setStatus?.("HUD rebuild failed", "error");
+            return null;
+        }
+        primeHud(status, state);
+        return status;
     };
     resetHudSignatures();
     primeHud("Searching for EUC World", renderState);
@@ -66,11 +83,7 @@ export async function startPlugin(bridge) {
         primeHud("EUC World not found", renderState);
     }
     else {
-        if (workingUrl !== SIMULATOR_URL) {
-            const switched = await ensureHudLayout("full");
-            if (switched)
-                primeHud("Connected", renderState);
-        }
+        await applyPreferredHudLayout(workingUrl, "Connected", renderState);
         window.__setWorkingUrl?.(workingUrl);
         window.__setStatus?.(`Connected: ${workingUrl}`, "connected");
     }
@@ -315,11 +328,7 @@ export async function startPlugin(bridge) {
                     const found = await findWorkingUrl();
                     if (found) {
                         workingUrl = found;
-                        if (workingUrl !== SIMULATOR_URL) {
-                            const switched = await ensureHudLayout("full");
-                            if (switched)
-                                primeHud("Connected", renderState);
-                        }
+                        await applyPreferredHudLayout(workingUrl, "Connected", renderState);
                         window.__setWorkingUrl?.(found);
                         fails = 0;
                     }
@@ -356,7 +365,7 @@ export async function startPlugin(bridge) {
         resetHudSignatures();
         window.__setStatus?.("Reconnecting...", "");
         renderState = { heartbeatOn: false, showHeartbeat: false };
-        if (!await ensureHudLayout("compact")) {
+        if (!await forceHudLayout("compact")) {
             window.__setStatus?.("HUD rebuild failed", "error");
             return;
         }
@@ -364,11 +373,7 @@ export async function startPlugin(bridge) {
         const found = await findWorkingUrl();
         if (found) {
             workingUrl = found;
-            if (workingUrl !== SIMULATOR_URL) {
-                const switched = await ensureHudLayout("full");
-                if (switched)
-                    primeHud("Connected", renderState);
-            }
+            await applyPreferredHudLayout(workingUrl, "Connected", renderState);
             window.__setWorkingUrl?.(found);
             fails = 0;
             latestData = {};
@@ -386,12 +391,10 @@ export async function startPlugin(bridge) {
         renderState = { heartbeatOn: false, showHeartbeat: false };
         window.__setStatus?.(`Forced URL: ${url}`, "connected");
         window.__setWorkingUrl?.(url);
-        const targetLayout = url === SIMULATOR_URL ? "compact" : "full";
-        if (!await ensureHudLayout(targetLayout) && targetLayout === "compact") {
-            window.__setStatus?.("HUD rebuild failed", "error");
+        const hudStatus = await applyPreferredHudLayout(url, url === SIMULATOR_URL ? "Simulator ready" : "Forced URL", renderState);
+        if (!hudStatus) {
             return;
         }
-        primeHud(url === SIMULATOR_URL ? "Simulator ready" : "Forced URL", renderState);
         startLoops();
     };
 }

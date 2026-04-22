@@ -13,10 +13,13 @@ export function buildSlowTextState(d, aux) {
         batteryTemp: `BAT ${fmtInt(battery)}%   TEMP ${fmtInt(temp)}C`,
         electrical: `VOLT ${fmt(d.voltage, 1)}V   CURR ${fmt(d.current, 1)}A`,
         deviceBattery: `PHONE ${fmtInt(phoneBattery)}%   GLASSES ${fmtInt(glassesBattery)}%`,
-        summary: `TRIP ${fmt(d.trip_distance, 2)}km | ODO ${fmt(d.total_distance, 0)}km | `
-            + `BAT ${fmtInt(battery)}% | TEMP ${fmtInt(temp)}C | `
-            + `V ${fmt(d.voltage, 1)}V | I ${fmt(d.current, 1)}A | `
-            + `PH ${fmtInt(phoneBattery)}% | GL ${fmtInt(glassesBattery)}%`,
+        summary: [
+            `TRIP ${fmt(d.trip_distance, 2)} km`,
+            `ODO ${fmt(d.total_distance, 0)} km`,
+            `BAT ${fmtInt(battery)}%   TEMP ${fmtInt(temp)}C`,
+            `VOLT ${fmt(d.voltage, 1)}V   CURR ${fmt(d.current, 1)}A`,
+            `PHONE ${fmtInt(phoneBattery)}%   GLASSES ${fmtInt(glassesBattery)}%`,
+        ].join("\n"),
     };
 }
 export function blankSlowTextState() {
