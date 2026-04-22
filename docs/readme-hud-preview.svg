@@ -31,14 +31,15 @@
     <rect width="576" height="96" fill="#000000"/>
     <rect y="96" width="576" height="76" fill="#000000"/>
 
-    <circle cx="96" cy="58" r="42" stroke="#242424" stroke-width="9" fill="none"/>
-    <circle cx="96" cy="58" r="42" stroke="#4A4A4A" stroke-width="9" stroke-linecap="round" fill="none" stroke-dasharray="168 120" transform="rotate(148 96 58)"/>
-    <circle cx="63" cy="82" r="5" fill="#FFFFFF"/>
-    <circle cx="133" cy="79" r="5" fill="#FFFFFF"/>
-    <text x="96" y="58" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle" dominant-baseline="middle">37</text>
+    <path d="M60.6 80.5 A42 42 0 1 1 131.4 80.5" stroke="#242424" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <path d="M60.6 80.5 A42 42 0 0 1 54.9 66.7" stroke="#4A4A4A" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <circle cx="54.9" cy="66.7" r="5" fill="#FFFFFF"/>
+    <line x1="115.2" y1="52.3" x2="123.8" y2="49.8" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <polygon points="128.6,48.3 122.1,52.2 120.5,46.7" fill="#FFFFFF"/>
+    <text x="96" y="58" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle" dominant-baseline="middle">10</text>
     <text x="96" y="80" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle">km/h</text>
 
-    <text x="8" y="130" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="18" font-weight="700">MRG 74%   PWR 1940W .</text>
+    <text x="8" y="130" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="18" font-weight="700">MRG 80%   PWR 380W .</text>
     <text x="210" y="22" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="18" font-weight="700">.</text>
 
     <text x="298" y="30" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="18" font-weight="700">TRIP 12.64 km</text>
@@ -56,14 +57,15 @@
   <g transform="translate(120 845) scale(1.8)">
     <rect width="576" height="72" fill="#000000"/>
 
-    <circle cx="96" cy="58" r="42" stroke="#242424" stroke-width="9" fill="none"/>
-    <circle cx="96" cy="58" r="42" stroke="#4A4A4A" stroke-width="9" stroke-linecap="round" fill="none" stroke-dasharray="150 138" transform="rotate(146 96 58)"/>
-    <circle cx="70" cy="88" r="5" fill="#FFFFFF"/>
-    <circle cx="127" cy="86" r="5" fill="#FFFFFF"/>
-    <text x="96" y="58" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle" dominant-baseline="middle">37</text>
+    <path d="M60.6 80.5 A42 42 0 1 1 131.4 80.5" stroke="#242424" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <path d="M60.6 80.5 A42 42 0 0 1 54.9 66.7" stroke="#4A4A4A" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <circle cx="54.9" cy="66.7" r="5" fill="#FFFFFF"/>
+    <line x1="115.2" y1="52.3" x2="123.8" y2="49.8" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <polygon points="128.6,48.3 122.1,52.2 120.5,46.7" fill="#FFFFFF"/>
+    <text x="96" y="58" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle" dominant-baseline="middle">10</text>
     <text x="96" y="80" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="14" font-weight="700" text-anchor="middle">km/h</text>
 
-    <text x="8" y="130" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="18" font-weight="700">MRG 74%   PWR 1940W .</text>
+    <text x="8" y="130" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="18" font-weight="700">MRG 80%   PWR 380W .</text>
 
     <text x="206" y="28" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="16" font-weight="700">TRIP 12.64 km</text>
     <text x="206" y="52" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="16" font-weight="700">ODO 1854 km</text>
