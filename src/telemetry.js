@@ -65,8 +65,8 @@ function buildCodeMap(raw) {
     for (const item of entries) {
         if (!isRecord(item))
             continue;
-        const value = item.v ?? item.value ?? item.s;
-        for (const alias of [item.w, item.key, item.name]) {
+        const value = item.v ?? item.value ?? item.s ?? item.n ?? item.val ?? item.data;
+        for (const alias of [item.w, item.key, item.name, item.code, item.id, item.k]) {
             if (typeof alias !== "string")
                 continue;
             map[normalizeKey(alias)] = value;
@@ -139,10 +139,11 @@ export async function findWorkingUrl() {
 export function normalize(raw) {
     const source = isRecord(raw) ? raw : unwrapPayload(raw);
     const codeMap = buildCodeMap(raw);
-    const speed = pickCodeValue(source, codeMap, "vsp", "speed", "speedKph", "speedKmh");
+    const speed = pickCodeValue(source, codeMap, "vsp", "speed", "speedKph", "speedKmh")
+        ?? pickFuzzyCodeValue(codeMap, ["speed"], ["kph"], ["kmh"]);
     const battery = pickCodeValue(source, codeMap, "vbf", "vba", "vbm", "vbx", "battery", "batteryPercent");
     const phoneBattery = pickCodeValue(source, codeMap, "pba", "phoneBattery", "phone_battery", "phone battery", "mobileBattery", "mobile_battery", "mobile battery", "smartphoneBattery", "smartphone_battery", "hostBattery", "host_battery", "appBattery", "app_battery") ?? pickFuzzyCodeValue(codeMap, ["phone", "battery"], ["mobile", "battery"], ["smartphone", "battery"], ["host", "battery"], ["app", "battery"]);
-    const safetyMargin = pickCodeValue(source, codeMap, "vsmg", "vsmn", "safetyMargin", "safety_margin", "margin");
+    const safetyMargin = pickCodeValue(source, codeMap, "vsmg", "vsmn", "safetyMargin", "safety_margin", "margin") ?? pickFuzzyCodeValue(codeMap, ["safety", "margin"], ["margin", "percent"]);
     const temperature = pickCodeValue(source, codeMap, "vte", "vtn", "vtx", "temperature", "temp", "boardTemp");
     const voltage = pickCodeValue(source, codeMap, "vvo", "vvn", "vvx", "voltage", "packVoltage", "batteryVoltage");
     const current = pickCodeValue(source, codeMap, "vcu", "vcn", "vcx", "current", "amps", "batteryCurrent");

@@ -109,6 +109,14 @@
         <span>Tick count (proves interval is running):</span>
         <span id="tickCount">0</span>
       </div>
+      <div class="info-row">
+        <span>Plugin version:</span>
+        <span id="appVersion">unknown</span>
+      </div>
+      <div class="info-row">
+        <span>Build stamp:</span>
+        <span id="buildStamp">unknown</span>
+      </div>
     </div>
 
     <div class="card">
@@ -136,16 +144,34 @@
       // Expose port to main.ts
       window.__eucPort = document.getElementById('portInput').value;
 
+      let currentStatusMessage = 'Initializing…';
+      let currentAppVersion = '';
+      const renderStatusText = () => {
+        const suffix = currentAppVersion ? ` (v${currentAppVersion})` : '';
+        document.getElementById('statusText').textContent = `${currentStatusMessage}${suffix}`;
+      };
+
       // Status display
       window.__setStatus = (msg, type) => {
         const bar = document.getElementById('statusBar');
         bar.className = 'status-bar ' + (type || '');
-        document.getElementById('statusText').textContent = msg;
+        currentStatusMessage = msg;
+        renderStatusText();
       };
 
       // Tick counter — proves the setInterval is firing
       window.__setTickCount = (n) => {
         document.getElementById('tickCount').textContent = String(n);
+      };
+
+      window.__setAppVersion = (version) => {
+        currentAppVersion = version;
+        document.getElementById('appVersion').textContent = version;
+        renderStatusText();
+      };
+
+      window.__setBuildStamp = (stamp) => {
+        document.getElementById('buildStamp').textContent = stamp;
       };
 
       // Show the URL that actually worked

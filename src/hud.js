@@ -281,7 +281,7 @@ function drawDynamicTile(d) {
     const ctx = initTileContext();
     const rawSpeed = d.speed ?? d.speedKph;
     const rawSafety = d.safetyMargin;
-    const speed = rawSpeed == null ? undefined : Math.round(rawSpeed);
+    const speed = rawSpeed == null ? 0 : Math.round(rawSpeed);
     const safety = rawSafety == null ? undefined : Math.round(clamp(rawSafety, 0, 100));
     const gaugeCenterX = 96;
     const gaugeCenterY = 58;
@@ -309,24 +309,26 @@ function drawDynamicTile(d) {
     ctx.arc(gaugeCenterX + Math.cos(valueAngle) * gaugeRadius, gaugeCenterY + Math.sin(valueAngle) * gaugeRadius, 5, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
-    ctx.save();
-    ctx.strokeStyle = HUD_FG;
-    ctx.fillStyle = HUD_FG;
-    ctx.lineWidth = 4;
-    const marginOuter = gaugeRadius - 8;
-    const marginInner = gaugeRadius - 22;
-    const marginX = gaugeCenterX + Math.cos(safetyAngle) * marginOuter;
-    const marginY = gaugeCenterY + Math.sin(safetyAngle) * marginOuter;
-    const marginBaseX = gaugeCenterX + Math.cos(safetyAngle) * marginInner;
-    const marginBaseY = gaugeCenterY + Math.sin(safetyAngle) * marginInner;
-    ctx.beginPath();
-    ctx.moveTo(marginBaseX, marginBaseY);
-    ctx.lineTo(marginX, marginY);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(marginX, marginY, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    if (safety != null) {
+        ctx.save();
+        ctx.strokeStyle = HUD_FG;
+        ctx.fillStyle = HUD_FG;
+        ctx.lineWidth = 4;
+        const marginOuter = gaugeRadius - 8;
+        const marginInner = gaugeRadius - 22;
+        const marginX = gaugeCenterX + Math.cos(safetyAngle) * marginOuter;
+        const marginY = gaugeCenterY + Math.sin(safetyAngle) * marginOuter;
+        const marginBaseX = gaugeCenterX + Math.cos(safetyAngle) * marginInner;
+        const marginBaseY = gaugeCenterY + Math.sin(safetyAngle) * marginInner;
+        ctx.beginPath();
+        ctx.moveTo(marginBaseX, marginBaseY);
+        ctx.lineTo(marginX, marginY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(marginX, marginY, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
     ctx.save();
     ctx.fillStyle = HUD_FG;
     ctx.textAlign = "center";
@@ -350,7 +352,7 @@ export function resetHudTileSignatures() {
 }
 function tileSignature(role, d) {
     const speed = d.speed ?? d.speedKph;
-    const shownSpeed = speed == null ? undefined : Math.round(speed);
+    const shownSpeed = speed == null ? 0 : Math.round(speed);
     const shownSafety = d.safetyMargin == null ? undefined : Math.round(clamp(d.safetyMargin, 0, 100));
     switch (role) {
         case "dynamic":

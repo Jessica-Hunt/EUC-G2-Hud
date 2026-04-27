@@ -4,12 +4,25 @@ import { blankSlowTextState, buildFastReadoutState, buildSlowTextState, getCaptu
 import { buildHudPageDefinition, getHudLayoutMode, setHudLayoutMode } from "./layout";
 import { fetchWheelData, findWorkingUrl, pickConnectedBatteryLevel } from "./telemetry";
 import { clamp } from "./utils";
+function mergeWheelData(previous, next) {
+    const merged = { ...previous };
+    for (const [key, value] of Object.entries(next)) {
+        if (value !== undefined) {
+            merged[key] = value;
+        }
+    }
+    return merged;
+}
 export async function startPlugin(bridge) {
-    setHudLayoutMode("compact");
-    const pageResult = await bridge.createStartUpPageContainer(new CreateStartUpPageContainer(buildHudPageDefinition()));
+    setHudLayoutMode("full");
+    let pageResult = await bridge.createStartUpPageContainer(new CreateStartUpPageContainer(buildHudPageDefinition()));
     if (pageResult !== 0) {
-        window.__setStatus?.(`Page creation failed (code ${pageResult})`, "error");
-        return;
+        const rebuilt = await bridge.rebuildPageContainer(new RebuildPageContainer(buildHudPageDefinition()));
+        if (!rebuilt) {
+            window.__setStatus?.(`Page creation failed (code ${pageResult})`, "error");
+            return;
+        }
+        pageResult = 0;
     }
     resetHudTileSignatures();
     let renderState = { heartbeatOn: false, showHeartbeat: false };
@@ -282,18 +295,22 @@ export async function startPlugin(bridge) {
             const { data, ok, error } = fetchResult;
             if (ok) {
                 const wasLive = renderState.showHeartbeat;
+                const mergedData = mergeWheelData(latestData, data);
+                if (mergedData.speed == null && mergedData.speedKph == null) {
+                    mergedData.speed = 0;
+                }
                 const prevShownSpeed = latestData.speed == null && latestData.speedKph == null
                     ? undefined
                     : Math.round(latestData.speed ?? latestData.speedKph ?? 0);
                 const prevShownSafety = latestData.safetyMargin == null
                     ? undefined
                     : Math.round(clamp(latestData.safetyMargin, 0, 100));
-                const nextShownSpeed = data.speed == null && data.speedKph == null
+                const nextShownSpeed = mergedData.speed == null && mergedData.speedKph == null
                     ? undefined
-                    : Math.round(data.speed ?? data.speedKph ?? 0);
-                const nextShownSafety = data.safetyMargin == null
+                    : Math.round(mergedData.speed ?? mergedData.speedKph ?? 0);
+                const nextShownSafety = mergedData.safetyMargin == null
                     ? undefined
-                    : Math.round(clamp(data.safetyMargin, 0, 100));
+                    : Math.round(clamp(mergedData.safetyMargin, 0, 100));
                 const now = Date.now();
                 let heartbeatOn = renderState.heartbeatOn;
                 if (now - lastHeartbeatToggleAt >= HEARTBEAT_MS) {
@@ -301,7 +318,7 @@ export async function startPlugin(bridge) {
                     lastHeartbeatToggleAt = now;
                 }
                 fails = 0;
-                latestData = data;
+                latestData = mergedData;
                 if (workingUrl === SIMULATOR_URL && latestAuxData.glassesBattery == null) {
                     latestAuxData = {
                         ...latestAuxData,
@@ -365,7 +382,7 @@ export async function startPlugin(bridge) {
         resetHudSignatures();
         window.__setStatus?.("Reconnecting...", "");
         renderState = { heartbeatOn: false, showHeartbeat: false };
-        if (!await forceHudLayout("compact")) {
+        if (!await forceHudLayout("full")) {
             window.__setStatus?.("HUD rebuild failed", "error");
             return;
         }

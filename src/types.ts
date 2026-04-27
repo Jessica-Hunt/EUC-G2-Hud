@@ -3,6 +3,9 @@ export interface BrowserBatteryManager extends EventTarget {
 }
 
 declare global {
+  const __APP_VERSION__: string;
+  const __BUILD_STAMP__: string;
+
   interface Window {
     __eucPort?: string;
     __reconnect?: () => void;
@@ -14,6 +17,8 @@ declare global {
     __setRaw?: (data: object) => void;
     __setTickCount?: (n: number) => void;
     __setWorkingUrl?: (url: string) => void;
+    __setAppVersion?: (version: string) => void;
+    __setBuildStamp?: (stamp: string) => void;
   }
 
   interface Navigator {

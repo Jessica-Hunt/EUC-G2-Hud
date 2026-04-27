@@ -1,7 +1,8 @@
 {
   "package_id": "com.jessicahunt.eucworldg2",
   "name": "EUC World HUD",
-  "version": "0.0.2",
+  "version": "0.0.7",
+  "icon": "euc-icon-24.png",
   "description": "Live ride dashboard for electric unicycles via EUC World",
   "author": "Jessica Hunt",
   "entrypoint": "index.html",

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12">
+  <!-- black background -->
+  <rect width="12" height="12" fill="black"/>
+
+  <!-- speedometer arc: semicircle, center (6,9) radius 5 -->
+  <path d="M 1 9 A 5 5 0 0 1 11 9" stroke="white" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+
+  <!-- tick marks at 0%, 50%, 100% of arc -->
+  <!-- left end tick (0 km/h) -->
+  <line x1="1" y1="9" x2="1.8" y2="7.4" stroke="white" stroke-width="0.8" stroke-linecap="round"/>
+  <!-- top tick (mid speed) -->
+  <line x1="6" y1="4" x2="6" y2="5.2" stroke="white" stroke-width="0.8" stroke-linecap="round"/>
+  <!-- right end tick (max speed) -->
+  <line x1="11" y1="9" x2="10.2" y2="7.4" stroke="white" stroke-width="0.8" stroke-linecap="round"/>
+
+  <!-- needle at ~65% of arc (pointing up-right) -->
+  <!-- angle = 180° - (0.65 × 180°) = 63° from horizontal → (cos63°≈0.454, sin63°≈0.891) -->
+  <!-- tip at (6 + 4.5×0.454, 9 - 4.5×0.891) ≈ (8.04, 4.99) -->
+  <line x1="6" y1="9" x2="8.0" y2="5.0" stroke="white" stroke-width="1" stroke-linecap="round"/>
+
+  <!-- center pivot dot -->
+  <circle cx="6" cy="9" r="0.9" fill="white"/>
+</svg>
